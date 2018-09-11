@@ -8,6 +8,8 @@ import numpy as np
 from six import StringIO
 import six
 from gym import error, logger
+import pdb
+import cv2
 
 def touch(path):
     open(path, 'a').close()
@@ -92,13 +94,17 @@ class VideoRecorder(object):
     def functional(self):
         return self.enabled and not self.broken
 
-    def capture_frame(self):
+    def capture_frame(self, context=None):
         """Render the given `env` and add the resulting frame to the video."""
         if not self.functional: return
         logger.debug('Capturing video frame: path=%s', self.path)
 
         render_mode = 'ansi' if self.ansi_mode else 'rgb_array'
         frame = self.env.render(mode=render_mode)
+        if context is not None:
+            frame = np.ascontiguousarray(frame, dtype=np.uint8)
+            cv2.putText(frame, str(context), (100,100), cv2.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 2, cv2.LINE_AA)
+            #pdb.set_trace()
 
         if frame is None:
             if self._async:
